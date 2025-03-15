@@ -2,7 +2,6 @@
 
 import { ExternalLink, Star, MoreHorizontal, Trash2, Edit, Copy } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import type { Bookmark } from "@/types/bookmark"
 import { cn } from "@/lib/utils"

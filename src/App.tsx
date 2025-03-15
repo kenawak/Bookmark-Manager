@@ -26,6 +26,7 @@ export default function App() {
 
   // Initialize with mock data
   useEffect(() => {
+    console.log("App mounted")
     setBookmarks(mockBookmarks)
     setFolders(mockFolders)
   }, [])
@@ -90,7 +91,7 @@ export default function App() {
 
   return (
     <ThemeProvider attribute="class">
-      <div className="flex h-screen overflow-hidden">
+      <div className="flex h-screen min-w-[400px] overflow-hidden">
         {/* Sidebar - Hidden on mobile, shown through Sheet */}
         <aside className={cn("w-64 border-r bg-background hidden md:block", isMobile && "hidden")}>
           <Sidebar

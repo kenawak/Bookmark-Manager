@@ -24,13 +24,12 @@ export default function BookmarkManager() {
 
   // Mock data initialization
   useEffect(() => {
-    // This would be replaced with actual data fetching in a real app
     const mockFolders: FolderType[] = [
-      { id: "1", name: "Frontend", count: 5 },
-      { id: "2", name: "Backend", count: 3 },
-      { id: "3", name: "DevOps", count: 2 },
-      { id: "4", name: "Design", count: 4 },
-      { id: "5", name: "Learning", count: 6 },
+      { id: "1", name: "Frontend", parentId: null, count: 3 },
+      { id: "2", name: "Backend", parentId: null, count: 1 },
+      { id: "3", name: "DevOps", parentId: null, count: 1 },
+      { id: "4", name: "Design", parentId: "1", count: 0 },
+      { id: "5", name: "Learning", parentId: null, count: 0 },
     ]
 
     const mockBookmarks: Bookmark[] = [
@@ -42,6 +41,8 @@ export default function BookmarkManager() {
         folderId: "1",
         createdAt: new Date().toISOString(),
         isFavorite: true,
+        favicon: "",
+        color: "#4285F4",
       },
       {
         id: "2",
@@ -51,6 +52,8 @@ export default function BookmarkManager() {
         folderId: "1",
         createdAt: new Date().toISOString(),
         isFavorite: true,
+        favicon: "",
+        color: "#4285F4",
       },
       {
         id: "3",
@@ -60,6 +63,8 @@ export default function BookmarkManager() {
         folderId: "2",
         createdAt: new Date().toISOString(),
         isFavorite: false,
+        favicon: "",
+        color: "",
       },
       {
         id: "4",
@@ -69,6 +74,8 @@ export default function BookmarkManager() {
         folderId: "3",
         createdAt: new Date().toISOString(),
         isFavorite: false,
+        favicon: "",
+        color: "",
       },
       {
         id: "5",
@@ -78,6 +85,8 @@ export default function BookmarkManager() {
         folderId: "4",
         createdAt: new Date().toISOString(),
         isFavorite: true,
+        favicon: "",
+        color: "",
       },
       {
         id: "6",
@@ -87,6 +96,8 @@ export default function BookmarkManager() {
         folderId: "1",
         createdAt: new Date().toISOString(),
         isFavorite: false,
+        favicon: "",
+        color: "",
       },
       {
         id: "7",
@@ -96,6 +107,8 @@ export default function BookmarkManager() {
         folderId: "1",
         createdAt: new Date().toISOString(),
         isFavorite: true,
+        favicon: "",
+        color: "",
       },
       {
         id: "8",
@@ -105,6 +118,8 @@ export default function BookmarkManager() {
         folderId: "5",
         createdAt: new Date().toISOString(),
         isFavorite: true,
+        favicon: "",
+        color: "",
       },
     ]
 
@@ -150,16 +165,16 @@ export default function BookmarkManager() {
       searchQuery === "" ||
       bookmark.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       bookmark.url.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      bookmark.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+      (bookmark.tags && bookmark.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())))
 
     const matchesFolder = activeFolder === null || bookmark.folderId === activeFolder
-    const matchesTag = activeTag === null || bookmark.tags.includes(activeTag)
+    const matchesTag = activeTag === null || (bookmark.tags && bookmark.tags.includes(activeTag))
 
     return matchesSearch && matchesFolder && matchesTag
   })
 
   // Get all unique tags from bookmarks
-  const allTags = Array.from(new Set(bookmarks.flatMap((bookmark) => bookmark.tags)))
+  const allTags = Array.from(new Set(bookmarks.flatMap((bookmark) => bookmark.tags || [])))
 
   // Get favorite bookmarks
   const favoriteBookmarks = bookmarks.filter((bookmark) => bookmark.isFavorite)
@@ -222,7 +237,7 @@ export default function BookmarkManager() {
                         className="w-full justify-between"
                         onClick={() => {
                           setActiveFolder((prev) => (prev === folder.id ? null : folder.id))
-                          setActiveTag(null)
+                          setActiveTag((prev) => (prev === folder.id ? null : folder.id as string))
                           toggleFolderExpanded(folder.id)
                         }}
                       >
@@ -276,7 +291,7 @@ export default function BookmarkManager() {
                     size="sm"
                     className="w-full justify-start"
                     onClick={() => {
-                      setActiveTag((prev) => (prev === tag ? null : tag))
+                      setActiveTag((prev) => (prev === tag ? null : tag as string))
                       setActiveFolder(null)
                     }}
                   >
@@ -384,6 +399,7 @@ export default function BookmarkManager() {
         onOpenChange={setIsAddDialogOpen}
         onAdd={handleAddBookmark}
         folders={folders}
+        currentFolderId={activeFolder}
         existingTags={allTags}
       />
     </div>

@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Bookmark Manager",
+  "version": "1.0",
+  "description": "A modern bookmark manager with customizable icons and hierarchical organization",
+  "action": {
+    "default_popup": "dist/index.html",
+    "default_icon": {
+      "16": "public/image.png",
+      "48": "public/image.png",
+      "128": "public/image.png"
+    }
+  },
+  "permissions": ["bookmarks", "storage"],
+  "icons": {
+    "16": "public/image.png",
+    "48": "public/image.png",
+    "128": "public/image.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}

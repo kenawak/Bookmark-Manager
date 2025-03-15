@@ -8,6 +8,7 @@ export interface Bookmark {
     createdAt: string
     isFavorite?: boolean
     description?: string
+    tags?: string[]
   }
   
   export interface Folder {

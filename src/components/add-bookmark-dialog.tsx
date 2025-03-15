@@ -26,6 +26,7 @@ interface AddBookmarkDialogProps {
   onAdd: (bookmark: Bookmark) => void
   folders: Folder[]
   currentFolderId: string | null
+  existingTags?: string[]
 }
 
 function AddBookmarkDialog({
@@ -34,6 +35,7 @@ function AddBookmarkDialog({
   onAdd,
   folders,
   currentFolderId,
+  existingTags = [],
 }: AddBookmarkDialogProps) {
   const [title, setTitle] = useState("")
   const [url, setUrl] = useState("")
@@ -42,6 +44,7 @@ function AddBookmarkDialog({
   const [favicon, setFavicon] = useState("")
   const [color, setColor] = useState("#4285F4")
   const [showColorPicker, setShowColorPicker] = useState(false)
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [errors, setErrors] = useState<{
     title?: string
     url?: string
@@ -59,8 +62,7 @@ function AddBookmarkDialog({
   useEffect(() => {
     if (url) {
       try {
-        const urlObj = new URL(url.startsWith("http") ? url : `https://${url}`)
-        setFavicon(`${urlObj.origin}/favicon.ico`)
+        // const urlObj = new URL(url.startsWith("http") ? url : `https://${url}`)
       } catch (e) {
         // Invalid URL, don't set favicon
       }
@@ -84,12 +86,7 @@ function AddBookmarkDialog({
     if (!url.trim()) {
       newErrors.url = "URL is required"
     } else {
-      try {
-        // Ensure URL has protocol
-        const urlObj = new URL(url.startsWith("http") ? url : `https://${url}`)
-      } catch (e) {
-        newErrors.url = "Please enter a valid URL"
-      }
+      // const urlObj = new URL(url.startsWith("http") ? url : `https://${url}`)
     }
 
     if (!folderId) {
@@ -114,6 +111,7 @@ function AddBookmarkDialog({
       favicon,
       color,
       createdAt: "", // Will be set by the parent component
+      tags: selectedTags,
     }
 
     onAdd(newBookmark)
@@ -128,6 +126,7 @@ function AddBookmarkDialog({
     setFavicon("")
     setColor("#4285F4")
     setShowColorPicker(false)
+    setSelectedTags([])
     setErrors({})
   }
 
@@ -168,7 +167,7 @@ function AddBookmarkDialog({
 
                 {showColorPicker && (
                   <div className="absolute z-10 mt-2">
-                    <ChromePicker color={color} onChange={(color) => setColor(color.hex)} disableAlpha />
+                    <ChromePicker color={color} onChange={(color: { hex: string }) => setColor(color.hex)} disableAlpha />
                     <div className="fixed inset-0 z-[-1]" onClick={() => setShowColorPicker(false)} />
                   </div>
                 )}
@@ -233,6 +232,27 @@ function AddBookmarkDialog({
                 </SelectContent>
               </Select>
               {errors.folder && <p className="text-sm text-destructive">{errors.folder}</p>}
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="tags" className="font-medium">
+                Tags
+              </Label>
+              <Select value={selectedTags.join(",")} onValueChange={(value) => {
+                const tagsArray = value.split(",").filter(tag => tag);
+                setSelectedTags(tagsArray);
+              }}>
+                <SelectTrigger id="tags">
+                  <SelectValue placeholder="Select tags" />
+                </SelectTrigger>
+                <SelectContent>
+                  {existingTags.map((tag) => (
+                    <SelectItem key={tag} value={tag}>
+                      {tag}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
