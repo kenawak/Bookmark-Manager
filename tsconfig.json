@@ -8,6 +8,8 @@
     "baseUrl": "src",
     "paths": {
       "@/*": ["*"]
-    }
+    },
+    "outDir": "./dist",
+    "rootDir": "./src"
   }
 }

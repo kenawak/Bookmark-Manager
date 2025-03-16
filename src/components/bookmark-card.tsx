@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { ExternalLink, Star, MoreHorizontal, Trash2, Edit, Copy, Share2 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -16,15 +17,13 @@ interface BookmarkCardProps {
 }
 
 export default function BookmarkCard({ bookmark, onToggleFavorite, onDelete }: BookmarkCardProps) {
-  // const [isHovered, setIsHovered] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
 
   const handleCopyUrl = () => {
     navigator.clipboard.writeText(bookmark.url)
     toast({
       title: "URL copied",
       description: "The bookmark URL has been copied to your clipboard.",
-      // Remove variant if not supported
-      // variant: "destructive",
     })
   }
 
@@ -39,16 +38,13 @@ export default function BookmarkCard({ bookmark, onToggleFavorite, onDelete }: B
         toast({
           title: "Shared successfully",
           description: "The bookmark has been shared.",
-          // Remove variant if not supported
-          // variant: "destructive",
         })
       } catch (error) {
         if ((error as Error).name !== "AbortError") {
           toast({
             title: "Sharing failed",
             description: "There was an error sharing this bookmark.",
-            // Remove variant if not supported
-            // variant: "destructive",
+            variant: "destructive",
           })
         }
       }
@@ -85,8 +81,8 @@ export default function BookmarkCard({ bookmark, onToggleFavorite, onDelete }: B
   return (
     <Card
       className="overflow-hidden transition-all duration-200 hover:shadow-md"
-      // onMouseEnter={() => setIsHovered(true)}
-      // onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <CardContent className="p-4">
         <div className="flex items-start gap-3 mb-3">
