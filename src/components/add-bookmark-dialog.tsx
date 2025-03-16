@@ -1,12 +1,11 @@
-"use client"
+// src/AddBookmarkDialog.tsx
+"use client";
 
-import type React from "react"
-
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+import React, { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -14,19 +13,21 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import type { Bookmark, Folder } from "@/types/bookmark"
-import { ChromePicker } from "react-color"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+} from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ChromePicker } from "react-color";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import type { Bookmark, Folder } from "@/types/bookmark";
 
 interface AddBookmarkDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onAdd: (bookmark: Bookmark) => void
-  folders: Folder[]
-  currentFolderId: string | null
-  existingTags?: string[]
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onAdd: (bookmark: Bookmark) => void;
+  folders: Folder[];
+  currentFolderId: string | null;
+  existingTags?: string[];
+  initialUrl?: string; // New prop
+  initialFavicon?: string; // New prop
 }
 
 function AddBookmarkDialog({
@@ -36,111 +37,97 @@ function AddBookmarkDialog({
   folders,
   currentFolderId,
   existingTags = [],
+  initialUrl = "",
+  initialFavicon = "",
 }: AddBookmarkDialogProps) {
-  const [title, setTitle] = useState("")
-  const [url, setUrl] = useState("")
-  const [description, setDescription] = useState("")
-  const [folderId, setFolderId] = useState("")
-  const [favicon, setFavicon] = useState("")
-  const [color, setColor] = useState("#4285F4")
-  const [showColorPicker, setShowColorPicker] = useState(false)
-  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [title, setTitle] = useState("");
+  const [url, setUrl] = useState("");
+  const [description, setDescription] = useState("");
+  const [folderId, setFolderId] = useState("");
+  const [favicon, setFavicon] = useState(initialFavicon);
+  const [color, setColor] = useState("#4285F4");
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [errors, setErrors] = useState<{
-    title?: string
-    url?: string
-    folder?: string
-  }>({})
+    title?: string;
+    url?: string;
+    folder?: string;
+  }>({});
 
-  // Set current folder as default when dialog opens
+  // Set initial values and current folder when dialog opens
   useEffect(() => {
-    if (open && currentFolderId) {
-      setFolderId(currentFolderId)
-    }
-  }, [open, currentFolderId])
+    if (open) {
+      // Fetch the current tab's URL, favicon, and title
+      chrome.runtime.sendMessage({ type: "getTabUrl" }, (response) => {
+        if (chrome.runtime.lastError) {
+          console.error("Error fetching URL:", chrome.runtime.lastError.message);
+          return;
+        }
+        console.log("Response from background:", response);
+        const tabUrl = response?.url || initialUrl;
+        const tabFavicon = response?.favicon || initialFavicon;
+        const tabTitle = response?.title || ""; // Get the tab title
+        console.log("Current tab URL in popup:", tabUrl);
+        console.log("Current tab favicon in popup:", tabFavicon);
+        console.log("Current tab title in popup:", tabTitle);
+        setUrl(tabUrl);
+        setFavicon(tabFavicon);
+        setTitle(tabTitle); // Set the tab title
+      });
 
-  // Try to fetch favicon when URL changes
-  useEffect(() => {
-    if (url) {
-      try {
-        // const urlObj = new URL(url.startsWith("http") ? url : `https://${url}`)
-      } catch (e) {
-        // Invalid URL, don't set favicon
-      }
+      // Set the current folder if provided
+      if (currentFolderId) setFolderId(currentFolderId);
     }
-  }, [url])
+  }, [open, initialUrl, initialFavicon, currentFolderId]);
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    // Validate
-    const newErrors: {
-      title?: string
-      url?: string
-      folder?: string
-    } = {}
-
-    if (!title.trim()) {
-      newErrors.title = "Title is required"
-    }
-
-    if (!url.trim()) {
-      newErrors.url = "URL is required"
-    } else {
-      // const urlObj = new URL(url.startsWith("http") ? url : `https://${url}`)
-    }
-
-    if (!folderId) {
-      newErrors.folder = "Please select a folder"
-    }
+    const newErrors: { title?: string; url?: string; folder?: string } = {};
+    if (!title.trim()) newErrors.title = "Title is required";
+    if (!url.trim()) newErrors.url = "URL is required";
+    if (!folderId) newErrors.folder = "Please select a folder";
 
     if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors)
-      return
+      setErrors(newErrors);
+      return;
     }
 
-    // Format URL to ensure it has a protocol
-    const formattedUrl = url.startsWith("http") ? url : `https://${url}`
-
-    // Create new bookmark
+    const formattedUrl = url.startsWith("http") ? url : `https://${url}`;
     const newBookmark: Bookmark = {
-      id: "", // Will be set by the parent component
+      id: "",
       title,
       url: formattedUrl,
       description,
       folderId,
       favicon,
       color,
-      createdAt: "", // Will be set by the parent component
+      createdAt: "",
       tags: selectedTags,
-    }
+    };
 
-    onAdd(newBookmark)
-    resetForm()
-  }
+    onAdd(newBookmark);
+    resetForm();
+  };
 
   const resetForm = () => {
-    setTitle("")
-    setUrl("")
-    setDescription("")
-    setFolderId("")
-    setFavicon("")
-    setColor("#4285F4")
-    setShowColorPicker(false)
-    setSelectedTags([])
-    setErrors({})
-  }
+    setTitle("");
+    setUrl(initialUrl); // Reset to initial URL
+    setDescription("");
+    setFolderId("");
+    setFavicon(initialFavicon); // Reset to initial favicon
+    setColor("#4285F4");
+    setShowColorPicker(false);
+    setSelectedTags([]);
+    setErrors({});
+  };
 
   const handleDialogClose = (open: boolean) => {
-    if (!open) {
-      resetForm()
-    }
-    onOpenChange(open)
-  }
+    if (!open) resetForm();
+    onOpenChange(open);
+  };
 
-  // Get initials for avatar fallback
-  const getInitials = (title: string) => {
-    return title ? title.substring(0, 1).toUpperCase() : "B"
-  }
+  const getInitials = (title: string) => title ? title.substring(0, 1).toUpperCase() : "B";
 
   return (
     <Dialog open={open} onOpenChange={handleDialogClose}>
@@ -159,12 +146,10 @@ function AddBookmarkDialog({
                   {getInitials(title)}
                 </AvatarFallback>
               </Avatar>
-
               <div className="flex-1">
                 <Button type="button" variant="outline" size="sm" onClick={() => setShowColorPicker(!showColorPicker)}>
                   Change Color
                 </Button>
-
                 {showColorPicker && (
                   <div className="absolute z-10 mt-2">
                     <ChromePicker color={color} onChange={(color: { hex: string }) => setColor(color.hex)} disableAlpha />
@@ -175,9 +160,7 @@ function AddBookmarkDialog({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="title" className="font-medium">
-                Title
-              </Label>
+              <Label htmlFor="title" className="font-medium">Title</Label>
               <Input
                 id="title"
                 value={title}
@@ -189,9 +172,7 @@ function AddBookmarkDialog({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="url" className="font-medium">
-                URL
-              </Label>
+              <Label htmlFor="url" className="font-medium">URL</Label>
               <Input
                 id="url"
                 value={url}
@@ -203,9 +184,7 @@ function AddBookmarkDialog({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="description" className="font-medium">
-                Description
-              </Label>
+              <Label htmlFor="description" className="font-medium">Description</Label>
               <Textarea
                 id="description"
                 value={description}
@@ -216,18 +195,14 @@ function AddBookmarkDialog({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="folder" className="font-medium">
-                Folder
-              </Label>
+              <Label htmlFor="folder" className="font-medium">Folder</Label>
               <Select value={folderId} onValueChange={setFolderId}>
                 <SelectTrigger id="folder" className={errors.folder ? "border-destructive" : ""}>
                   <SelectValue placeholder="Select a folder" />
                 </SelectTrigger>
                 <SelectContent>
                   {folders.map((folder) => (
-                    <SelectItem key={folder.id} value={folder.id}>
-                      {folder.name}
-                    </SelectItem>
+                    <SelectItem key={folder.id} value={folder.id}>{folder.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -235,37 +210,28 @@ function AddBookmarkDialog({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="tags" className="font-medium">
-                Tags
-              </Label>
-              <Select value={selectedTags.join(",")} onValueChange={(value) => {
-                const tagsArray = value.split(",").filter(tag => tag);
-                setSelectedTags(tagsArray);
-              }}>
+              <Label htmlFor="tags" className="font-medium">Tags</Label>
+              <Select value={selectedTags.join(",")} onValueChange={(value) => setSelectedTags(value.split(",").filter(tag => tag))}>
                 <SelectTrigger id="tags">
                   <SelectValue placeholder="Select tags" />
                 </SelectTrigger>
                 <SelectContent>
                   {existingTags.map((tag) => (
-                    <SelectItem key={tag} value={tag}>
-                      {tag}
-                    </SelectItem>
+                    <SelectItem key={tag} value={tag}>{tag}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
+          <DialogFooter className="flex flex-row justify-end space-x-2">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
             <Button type="submit">Add Bookmark</Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
-export default AddBookmarkDialog
+export default AddBookmarkDialog;

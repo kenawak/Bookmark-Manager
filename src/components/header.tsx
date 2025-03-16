@@ -51,7 +51,7 @@ export function Header({
         {/* Right Section */}
         <div className="flex items-center gap-2 ml-2">
           <ThemeToggle />
-          <Button onClick={onAddBookmark} size="sm">
+          <Button onClick={() => { console.log("Add Bookmark button clicked"); onAddBookmark(); }} size="sm">
             <Plus className="h-4 w-4 mr-1" />
             Add Bookmark
           </Button>

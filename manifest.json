@@ -11,7 +11,7 @@
       "128": "public/image.png"
     }
   },
-  "permissions": ["bookmarks", "storage"],
+ "permissions": ["bookmarks", "storage", "tabs"],
   "icons": {
     "16": "public/image.png",
     "48": "public/image.png",
