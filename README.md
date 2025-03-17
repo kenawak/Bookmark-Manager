@@ -77,4 +77,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Contact
 
-For any inquiries or feedback, please reach out to [kenawakibsa95@gmail.com](mailto:kenawakibsa95@gmail.com).
+For any inquiries or feedback, please reach out to [Kenawak](t.me;//thekeocoder).
